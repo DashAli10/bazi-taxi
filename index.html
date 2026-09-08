@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>راننده تاکسی تهران 🚕</title>
+<meta name="description" content="بازی شبیه‌ساز و مدیریت رانندگی تاکسی در تهران: مسافر سوار کن، ترافیک را رد کن، بنزین بزن، ماشین را تعمیر کن و از پراید تا شاهین ارتقا بگیر.">
+<meta name="theme-color" content="#0d1117">
+<meta property="og:title" content="راننده تاکسی تهران 🚕">
+<meta property="og:description" content="شبیه‌ساز رانندگی تاکسی در تهران با مسافرهای بامزه، ترافیک، جریمه پلیس و ارتقای ماشین.">
+<meta property="og:type" content="website">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180.png">
+<link rel="icon" sizes="192x192" href="assets/icon-192.png" type="image/png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="تاکسی تهران">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="game"></canvas>
+
+  <div id="hud" class="hidden">
+    <div class="topbar">
+      <div class="chip"><span class="ic">💰</span><span id="money">۰</span></div>
+      <div class="chip"><span class="ic">📅</span><span id="day">۱</span><span class="sep">·</span><span id="clock">۰۶:۰۰</span></div>
+
+      <div class="gauges">
+        <div class="gauge" title="سوخت">
+          <span class="ic">⛽</span>
+          <div class="bar"><i id="fuelBar" style="width:100%"></i></div>
+        </div>
+        <div class="gauge" title="سلامت ماشین">
+          <span class="ic">🔧</span>
+          <div class="bar"><i id="healthBar" class="hp" style="width:100%"></i></div>
+        </div>
+      </div>
+
+      <div class="chip wanted hidden" id="wantedChip"><span class="ic">🚨</span><span id="wantedTxt">خلاف</span></div>
+      <div class="grow"></div>
+      <div class="chip ghost" id="carChip">🚕 پراید ۱۳۱</div>
+      <button class="iconbtn" id="btnSound" title="صدا">🔊</button>
+      <button class="iconbtn" id="btnHelp" title="راهنما">❓</button>
+      <button class="iconbtn" id="btnPause" title="مکث">⏸️</button>
+    </div>
+
+    <div id="minimapWrap">
+      <canvas id="minimap"></canvas>
+      <div id="speedo"><b id="speedVal">۰</b><small>km/h</small></div>
+    </div>
+
+    <div id="farecard" class="card hidden">
+      <div class="fc-head">
+        <span class="fc-emoji" id="fcEmoji">🎒</span>
+        <div>
+          <b id="fcName">مسافر</b>
+          <small id="fcState">در راه سوار کردن</small>
+        </div>
+      </div>
+      <div class="fc-row"><span>مقصد</span><b id="fcTo">—</b></div>
+      <div class="fc-row"><span>کرایه</span><b id="fcPrice">—</b></div>
+      <div class="fc-row"><span>رضایت</span>
+        <span class="satbar"><i id="fcSat" style="width:100%"></i></span>
+      </div>
+    </div>
+
+    <div id="eventbar" class="hidden">
+      <b id="evTitle">—</b>
+      <div class="evbar"><i id="evProgress" style="width:100%"></i></div>
+    </div>
+
+    <div id="dialogue" class="hidden">
+      <div class="avatar" id="dlgAvatar">🎒</div>
+      <div class="bubble">
+        <b id="dlgName">مسافر</b>
+        <p id="dlgText">…</p>
+      </div>
+    </div>
+
+    <div id="prompt" class="hidden"></div>
+    <div id="toasts"></div>
+
+    <div id="touch">
+      <div class="tside steer">
+        <button class="tbtn" data-k="ArrowLeft">◀</button>
+        <button class="tbtn" data-k="ArrowRight">▶</button>
+      </div>
+      <div class="tside pedals">
+        <div class="tactions">
+          <button class="tbtn small" data-k="h">📢</button>
+          <button class="tbtn small" data-k="m">🎵</button>
+          <button class="tbtn small" data-k="c">❄️</button>
+        </div>
+        <div class="tpedalrow">
+          <button class="tbtn gas" data-k="ArrowUp">گاز</button>
+          <button class="tbtn brk" data-k="ArrowDown">ترمز</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- منوی اصلی -->
+  <div class="panel show" id="menu">
+    <div class="sheet">
+      <div class="logo">🚕</div>
+      <h1>راننده تاکسی تهران</h1>
+      <p class="sub">صبح از خونه می‌زنی بیرون، باک نصفه‌ست و پراید هم زیاد حالش خوب نیست. مسافر سوار کن، ترافیک را رد کن و بالا بکش.</p>
+      <div class="menu-actions">
+        <button class="btn primary" id="btnNew">🚦 شروع بازی</button>
+        <button class="btn" id="btnContinue">💾 ادامه بازی ذخیره‌شده</button>
+        <button class="btn ghost" id="btnHelp2">📖 راهنما و کلیدها</button>
+      </div>
+      <div class="tipline" id="menuTip"></div>
+      <footer class="credit">ساخته‌شده با ❤️ برای خیابان‌های تهران — بدون نیاز به نصب، مستقیم توی مرورگر.</footer>
+    </div>
+  </div>
+
+  <!-- راهنما -->
+  <div class="panel" id="help">
+    <div class="sheet">
+      <h2>راهنمای بازی</h2>
+      <div class="cols">
+        <div>
+          <h3>کلیدها</h3>
+          <ul class="keys">
+            <li><kbd>↑</kbd> / <kbd>W</kbd> گاز</li>
+            <li><kbd>↓</kbd> / <kbd>S</kbd> ترمز و دنده‌عقب</li>
+            <li><kbd>←</kbd> <kbd>→</kbd> فرمان</li>
+            <li><kbd>Space</kbd> ترمز دستی</li>
+            <li><kbd>H</kbd> بوق</li>
+            <li><kbd>M</kbd> ضبط / آهنگ</li>
+            <li><kbd>C</kbd> کولر</li>
+            <li><kbd>Esc</kbd> مکث</li>
+          </ul>
+        </div>
+        <div>
+          <h3>چطور پول در بیاورم؟</h3>
+          <ul class="keys">
+            <li>روی نشانگر <b>زرد</b> بایست تا مسافر سوار شود.</li>
+            <li>او را به نشانگر <b>سبز</b> برسان.</li>
+            <li>درخواست‌های وسط راه را انجام بده تا انعام بگیری.</li>
+            <li>تصادف و پیاده‌رو‌رفتن = خسارت و جریمه.</li>
+            <li>در پمپ بنزین ⛽ و تعمیرگاه 🔧 <b>بایست</b> تا خدمات فعال شود.</li>
+            <li>در نمایشگاه 🚘 ماشین بهتر بخر: پراید ← پژو ← سمند ← دنا ← …</li>
+          </ul>
+        </div>
+      </div>
+      <button class="btn primary" id="btnHelpClose">فهمیدم، بریم</button>
+    </div>
+  </div>
+
+  <!-- مکث -->
+  <div class="panel" id="pause">
+    <div class="sheet">
+      <h2>مکث ⏸️</h2>
+      <div class="statgrid" id="pauseStats"></div>
+      <div class="menu-actions">
+        <button class="btn primary" id="btnResume">ادامه</button>
+        <button class="btn" id="btnSave">💾 ذخیره بازی</button>
+        <button class="btn ghost" id="btnQuit">خروج به منو</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- فروشگاه / نمایشگاه -->
+  <div class="panel" id="shop">
+    <div class="sheet wide">
+      <h2>🚘 نمایشگاه اتومبیل پارس</h2>
+      <p class="sub" id="shopMoney"></p>
+      <div class="tabs">
+        <button class="tab active" data-tab="cars">ماشین‌ها</button>
+        <button class="tab" data-tab="upgrades">ارتقاها</button>
+      </div>
+      <div class="shoplist" id="shopList"></div>
+      <button class="btn primary" id="btnShopClose">بستن</button>
+    </div>
+  </div>
+
+  <!-- خلاصه روز -->
+  <div class="panel" id="summary">
+    <div class="sheet">
+      <h2 id="sumTitle">پایان روز</h2>
+      <div class="statgrid" id="sumStats"></div>
+      <div class="quote" id="sumQuote"></div>
+      <button class="btn primary" id="btnNextDay">🌅 شروع روز بعد</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/util.js"></script>
+<script src="js/data.js"></script>
+<script src="js/city.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
