@@ -25,6 +25,9 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          # اگر Pages هنوز روشن نشده باشد، خود اکشن آن را روی حالت GitHub Actions فعال می‌کند
+          enablement: true
 
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3

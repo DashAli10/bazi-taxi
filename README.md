@@ -56,9 +56,9 @@ python3 -m http.server 8080
 
 فایل `.github/workflows/deploy-pages.yml` از قبل آماده است. فقط کافی است:
 
-1. تغییرات را روی شاخه‌ی `main` بفرستی (merge کنی).
-2. در گیت‌هاب به **Settings → Pages** بروی و در بخش **Build and deployment** گزینه‌ی **Source** را روی **GitHub Actions** بگذاری.
-3. تمام. بازی روی این آدرس منتشر می‌شود:
+1. مخزن باید **عمومی (public)** باشد — انتشار Pages از مخزن خصوصی فقط با اشتراک GitHub Pro/Team ممکن است.
+2. تغییرات را روی شاخه‌ی `main` بفرستی.
+3. تمام. ورک‌فلو خودش Pages را فعال می‌کند (`enablement: true`) و بازی روی این آدرس منتشر می‌شود:
 
 ```
 https://dashali10.github.io/bazi-taxi/
