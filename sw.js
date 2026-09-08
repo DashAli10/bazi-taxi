@@ -1,11 +1,15 @@
 /* سرویس‌ورکر برای اجرای آفلاین بازی */
-const CACHE = 'tehran-taxi-v1';
+const CACHE = 'tehran-taxi-v2';
 const ASSETS = [
   './',
   './index.html',
   './css/style.css',
   './manifest.webmanifest',
   './assets/icon.svg',
+  './assets/icon-180.png',
+  './assets/icon-192.png',
+  './assets/icon-512.png',
+  './assets/icon-maskable-512.png',
   './js/util.js',
   './js/data.js',
   './js/city.js',
